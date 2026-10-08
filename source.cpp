@@ -52,17 +52,33 @@ bool is_perfective_participle(string str)                     // Проверка, что с
     bool checker = false;                                       // иначе возвращает false
     int length = str.length();
 
-    if (length >= 5)
+    if (length >= 4)                    ////
     {
-        if ((str.find("вшись") == (length - 5)) || (str.find("шись") == (length - 4)))             // "шись" / "вшись"
-            checker = true;
+        if (length >= 7)
+        {
+            if ((str.find("вшись") == (length - 5)) || (str.find("шись") == (length - 4)))             // "шись" / "вшись"
+                checker = true;
+        }
 
-        else if ((str.find("вши") == (length - 3)) && check_exceptions(1, str))              // "вши"
-            checker = true;
+        if (length >= 5)
+        {
+            if ((str.find("вши") == (length - 3)) && check_exceptions(1, str))              // "вши"
+                checker = true;
 
-        else if ((str.find("ши") == (length - 2)) && (str[length - 3] != 'в') &&             // "ши"
-                ru_consonants(str[length - 3]) && check_exceptions(2, str))     
-            checker = true;
+            else if ((str.find("ши") == (length - 2)) && (str[length - 3] != 'в') &&             // "ши"
+                    ru_consonants(str[length - 3]) && check_exceptions(2, str))     
+                checker = true;
+        }
+        
+        if (length >= 4)
+        {
+            if (str.find("ув") == (length - 2))
+                checker = true;
+
+            else if ((str.find("ыв") == (length - 2)) && check_exceptions(3, str))
+                checker = true;
+
+        }
     }
 
     return checker;
@@ -83,19 +99,11 @@ bool check_exceptions(int variant, string str)                    // Проверка ст
     bool result = true;                                           // возвращает true, если исключение не найдено
     int length = str.length();                                    // возвращает false, если исключение найдено
 
-    if (variant == 1)               // Исключения для "вши"
+    if (variant == 1)                           // Исключения для "вши"
     {
         const int SIZE = 6;
-        string array[SIZE] = {"Ковши", "ковши", "Левши", "левши", "Правши", "правши"};
-        
-        for (int i=0; i<SIZE; i++)
-        {
-            if (str == array[i])
-            {
-                result = false;
-                break;
-            }
-        }
+        string array[SIZE] = {"Ковши", "ковши", "Левши", "левши", "Правши", "правши"};      /////////////CAPS
+        result = check_dictionary(SIZE, array, str);
     }
     else if (variant == 2)                   // Проверка для окончания "ши"
     {
@@ -109,6 +117,29 @@ bool check_exceptions(int variant, string str)                    // Проверка ст
                 result = false;
                 break;
             }
+        }
+    }
+    else if (variant == 3)                  // Исключения для "ыв"
+    {
+        const int SIZE = 14;
+        string array[SIZE] = {"взрыв", "порыв", "обрыв", "разрыв", "прорыв", "срыв",
+                            "отрыв", "подрыв", "надрыв", "перерыв", "нарыв",
+                            "наплыв", "заплыв", "смыв"};
+        result = check_dictionary(SIZE, array, str);
+    }
+    return result;              // уменьшить функцию или разделить на несколько
+}
+
+bool check_dictionary(const int SIZE, string* array, string str)                   // Проверка на слова исключения     
+{                                                                                // Возвращает true, если исключение найдено
+    bool result = true;                                                          // иначе возвращает false
+
+    for (int i=0; i<SIZE; i++)
+    {
+        if (str == array[i])
+        {
+            result = false;
+            break;
         }
     }
     return result;

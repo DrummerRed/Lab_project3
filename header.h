@@ -11,3 +11,4 @@ int check_symbol(char ch);                                       // Проверка на 
 bool is_perfective_participle(string str);                       // Проверка, что слово является совершенным деепричастием
 bool ru_consonants(char symb);                                   // Проверка, что символ является согласной буквой
 bool check_exceptions(int variant, string str);                    // Проверка строки на исключения
+bool check_dictionary(const int SIZE, string* array, string str);                   // Проверка на слова исключения 
