@@ -6,7 +6,8 @@ int main()
     SetConsoleCP(1251);                 
     SetConsoleOutputCP(1251);           
 
-    read_file("file_2.txt");
+    // read_file("file_2.txt");
+    menu();
 
     return 0;
 }
