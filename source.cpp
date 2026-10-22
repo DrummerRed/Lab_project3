@@ -13,6 +13,7 @@ int read_file(string file_name)                 // „тение файла
     {
         int ch;
         string str;
+        string end_of_word;
         while ((ch = file.get()) != EOF)
         {     
             char symb = char(ch);
@@ -20,9 +21,11 @@ int read_file(string file_name)                 // „тение файла
                 str += symb;
             else if (check_symbol(symb) == 1)
             {
-                if (is_perfective_participle(str))
-                    printf("%s\n", str.c_str());
+                str = to_lower(str);
+                if (is_perfective_participle(str, end_of_word))
+                    printf("%s\t- %s\n", str.c_str(), end_of_word.c_str());
                 str = "";
+                end_of_word = "";
             }
         }                   // выделенное из текста слово необходимо провер€ть на часть речи и уже после записывать
     
@@ -47,7 +50,7 @@ int check_symbol(char ch)                           // ѕроверка на символ раздел
     return split_str;
 }
 
-bool is_perfective_participle(string str)                     // ѕроверка, что слово €вл€етс€ совершенным деепричастием
+bool is_perfective_participle(string str, string& end_of_word)  // ѕроверка, что слово €вл€етс€ совершенным деепричастием
 {                                                               // возвращает true, если слово совершенное дееприч. 
     bool checker = false;                                       // иначе возвращает false
     int length = str.length();
@@ -56,27 +59,48 @@ bool is_perfective_participle(string str)                     // ѕроверка, что с
     {
         if (length >= 7)
         {
-            if ((str.find("вшись") == (length - 5)) || (str.find("шись") == (length - 4)))             // "шись" / "вшись"
+            if (str.find("вшись") == (length - 5))             // "вшись"
+            {
                 checker = true;
+                end_of_word = "вшись";
+            }
+
+            else if (str.find("шись") == (length - 4))          // "шись" 
+            {
+                checker = true;
+                end_of_word = "шись";
+            }
         }
 
         if (length >= 5)
         {
             if ((str.find("вши") == (length - 3)) && check_exceptions(1, str))              // "вши"
+            {
                 checker = true;
+                end_of_word = "вши";
+            }
 
             else if ((str.find("ши") == (length - 2)) && (str[length - 3] != 'в') &&             // "ши"
                     ru_consonants(str[length - 3]) && check_exceptions(2, str))     
+            {
                 checker = true;
+                end_of_word = "ши";
+            }
         }
         
         if (length >= 4)
         {
             if (str.find("ув") == (length - 2))
+            {
                 checker = true;
+                end_of_word = "ув";
+            }
 
             else if ((str.find("ыв") == (length - 2)) && check_exceptions(3, str))
+            {
                 checker = true;
+                end_of_word = "ыв";
+            }
 
         }
     }
@@ -143,4 +167,11 @@ bool check_dictionary(const int SIZE, string* array, string str)                
         }
     }
     return result;
+}
+
+string to_lower(string str)
+{
+    for (int i=0; i<str.length(); i++)
+        str[i] = tolower(str[i]);
+    return str;
 }

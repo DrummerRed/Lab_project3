@@ -16,9 +16,10 @@ void menu()                             // Главное меню программы
             choose_input_file(input_file);
         else if (key == '2')
         {
-            read_file(input_file);                      // добавить проверки на отсутствие введенного файла
+            search_rhymes_menu(input_file);
+            // read_file(input_file);                      // добавить проверки на отсутствие введенного файла
             // run_search(input_file);
-            _getch();
+            // _getch();
         }
     }
     system("cls");
@@ -146,3 +147,23 @@ bool input_file_name(string& name)              // Посимвольный ввод имени файла
 //         return false;
 //     return str.substr(str.length() - ending.length()) == ending;
 // }
+
+void search_rhymes_menu(string input_file)                           // Раздел меню "поиск рифм"
+{
+    bool flag_esc = false;
+
+    while (!flag_esc)
+    {
+        system("cls");
+        cout << "Для возвращения в меню нажмите Esc\n" << endl;
+
+        if (input_file != "")
+            read_file(input_file);
+        else
+            cout << "Поиск рифм недоступен, пока не выбран текстовый файл!";
+
+        int key = _getch();
+        if (key == KEY_ESC)
+            flag_esc = true;
+    }
+}
