@@ -1,8 +1,19 @@
 #include "header.h"
 
-int read_file(string file_name)                 // Чтение файла 
-{                                               // Возвращает 0 при успешном чтении файла
-    int code = 0;                               // Возвращает 1 при ошибке чтения файла
+void preparation_and_reading(string file_name)               // Создание структур данных для запис слов
+{                                                           // и чтение файла
+    vector<participle> participle_words;
+    read_file(file_name, &participle_words);
+
+    cout << "=======================" << endl;
+    cout << "Найденные рифмы:\n";
+    rhymes_output(&participle_words);
+
+}
+
+int read_file(string file_name, vector<participle>* v)        // Чтение файла 
+{                                                             // Возвращает 0 при успешном чтении файла
+    int code = 0;                                             // Возвращает 1 при ошибке чтения файла
 
     ifstream file;
     file.open(file_name);
@@ -23,16 +34,39 @@ int read_file(string file_name)                 // Чтение файла
             {
                 str = to_lower(str);
                 if (is_perfective_participle(str, end_of_word))
+                {
                     printf("%s\t- %s\n", str.c_str(), end_of_word.c_str());
+                    if (unique_elem(str, v))
+                    {
+                        participle temp;
+                        temp.word = str;
+                        temp.end_of_word = end_of_word;
+                        (*v).push_back(temp);
+                    }
+                }
+
                 str = "";
                 end_of_word = "";
             }
         }                   // выделенное из текста слово необходимо проверять на часть речи и уже после записывать
-    
         file.close();
     }
-
     return code;
+}
+
+bool unique_elem(string str, vector<participle>* v)             // Проверка на наличие в векторе указанного слова
+{                                                               // Возвращает true, если данный слово в векторе отсутствует
+    bool result = true;                                         // Иначе возвращает false
+    int length = (*v).size();
+    for (int i=0; i<length; i++)
+    {
+        if ((*v)[i].word == str)
+        {
+            result = false;
+            break;
+        }
+    }
+    return result;
 }
 
 int check_symbol(char ch)                           // Проверка на символ разделения 
@@ -50,6 +84,9 @@ int check_symbol(char ch)                           // Проверка на символ раздел
     return split_str;
 }
 
+
+////////////////////////////////////////////////////////////      Нужно сделать аналог для несовершенного вида
+///////////////////////////////////////////////////////////
 bool is_perfective_participle(string str, string& end_of_word)  // Проверка, что слово является совершенным деепричастием
 {                                                               // возвращает true, если слово совершенное дееприч. 
     bool checker = false;                                       // иначе возвращает false
@@ -107,6 +144,8 @@ bool is_perfective_participle(string str, string& end_of_word)  // Проверка, что
 
     return checker;
 }
+///////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
 
 bool ru_consonants(char symb)                       // Проверка, что символ является согласной буквой
 {                                                   // Возвращает true, если символ согласная буква

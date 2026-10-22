@@ -158,7 +158,8 @@ void search_rhymes_menu(string input_file)                           // Раздел м
         cout << "Для возвращения в меню нажмите Esc\n" << endl;
 
         if (input_file != "")
-            read_file(input_file);
+            // read_file(input_file);
+            preparation_and_reading(input_file);
         else
             cout << "Поиск рифм недоступен, пока не выбран текстовый файл!";
 
