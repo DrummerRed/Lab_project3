@@ -30,7 +30,11 @@ void print_menu(string input_file)              // Вывод главного меню
     system("cls");
     cout << "Поиск рифм\n";
     cout << "---------------------------\n";
-    cout << "Файл для поиска: " << (input_file == "" ? "не выбран" : input_file) << "\n\n";       /// ???
+    cout << "Файл для поиска: ";
+    if (input_file == "")
+        cout << "не выбран\n\n";
+    else
+        cout << input_file << "\n\n";
     cout << "1 - Выбрать файл для поиска\n";
     cout << "2 - Выполнить поиск рифм\n";
     cout << "Esc - Выход\n";

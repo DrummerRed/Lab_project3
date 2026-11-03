@@ -47,11 +47,24 @@ bool search_rhyms(participle elem_1, participle elem_2)                     // П
     bool result = false;
     if (elem_1.end_of_word == elem_2.end_of_word)
     {
-        if (elem_1.end_of_word == "вшись")
-            result = rhyme_with_ends_1(elem_1, elem_2, 1);
-        else if (elem_1.end_of_word == "шись")
+        string end = elem_1.end_of_word;
+
+        if (end == "вшись" || end == "вши")
+            // result = rhyme_with_ends_1(elem_1, elem_2, 1);                  // более мягкий поиск
+            result = rhyme_with_ends_1(elem_1, elem_2, 2);               // жесткий поиский
+        else if (end == "шись")
             result = rhyme_with_ends_1(elem_1, elem_2, 2);
-        else if (elem_1.end_of_word == "вши")
+        else if (end == "ши")
+            result = rhyme_with_ends_1(elem_1, elem_2, 2, 2);                   /// отступ может быть больше (3)
+
+        else if (end == "ув" || end == "ыв" || end == "ав" || end == "яв" ||
+            end == "ив" || end == "ев")                                            // совершенный вид на "в"
+            result = rhyme_with_ends_1(elem_1, elem_2, 1);
+        else if (end == "ая" || end == "яя" || end == "уя" || end == "юя")             // несовершенный вид на "я"
+            result = rhyme_with_ends_1(elem_1, elem_2, 1);
+        else if (end == "ясь" || end == "ась")                                          // несовершенный вид на "сь"
+            result = rhyme_with_ends_1(elem_1, elem_2, 2);
+        else if (end == "ывая" || end == "ивая" || end == "евая")                       // несовершенный вид на "вая"
             result = rhyme_with_ends_1(elem_1, elem_2, 1);
     }
     return result;
@@ -60,7 +73,7 @@ bool search_rhyms(participle elem_1, participle elem_2)                     // П
 // Разделим функции поиска рифм под каждое из окончаний деепричастий
 // Окончание 1 - "вшись", "шись", "вши"
 
-bool rhyme_with_ends_1(participle elem_1, participle elem_2, int indent)         // Сравнение слов на рифму по окончанию "вшись"
+bool rhyme_with_ends_1(participle elem_1, participle elem_2, int indent, int end_variant)         // Сравнение слов на рифму по окончаниям
 {                                                                   // Возвращает true, если потенциальная рифма найдена
     bool result = false;                                            // Если не найдена, возвращает false
     string end = elem_1.end_of_word;
@@ -73,12 +86,46 @@ bool rhyme_with_ends_1(participle elem_1, participle elem_2, int indent)        
     int idx_1 = elem_1.word.find(end) - indent;                                       
     int idx_2 = elem_2.word.find(end) - indent;                                       
 
-    if (elem_1.word.substr(idx_1, end_length) == elem_2.word.substr(idx_2, end_length))
-    {
-        // cout << elem_1.word.substr(idx_1, end_length) << endl;                  ///////delete
-        // cout <<elem_1.word<<endl;//
-        // cout <<elem_2.word<<endl;//
+    string sub_string_1 = elem_1.word.substr(idx_1, end_length);
+    string sub_string_2 = elem_2.word.substr(idx_2, end_length);
+    if (sub_string_1 == sub_string_2)
         result = true;
+    else
+    {
+        if (end_variant == 2)                           // "ши"
+        {
+            if (replacement_algorithm(sub_string_1, sub_string_2, 2))
+                result = true;
+        }
+    }
+    
+    return result;
+}
+
+bool rhyme_with_ends_2(participle elem_1, participle elem_2, int indent)
+{
+    bool result = false;                                            // Если не найдена, возвращает false
+    string end = elem_1.end_of_word;
+
+}
+
+bool replacement_algorithm(string end_1, string end_2, int reverse_position)                    // Алгоритм замены буквы для проверки равенства окончаний 
+{                                                                                               // Возвращает true, если при замене окончания будут равны
+    bool result = true;                                                                         // Иначе возвращает false
+    if (end_1.length() == end_2.length())
+    {
+        int true_pos = end_1.length() - reverse_position;
+        for (int i=0; i<end_1.length(); i++)
+        {
+            if (end_1[i] != end_2[i])
+            {
+                if (i != true_pos)
+                {
+                    result = false;
+                    break;
+                }
+            }
+        }
     }
     return result;
 }

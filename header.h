@@ -31,6 +31,8 @@ int read_file(string file_name, vector<participle>* v);          // Чтение файла
 bool unique_elem(string str, vector<participle>* v);             // Проверка на наличие в векторе указанного слова
 int check_symbol(char ch);                                       // Проверка на символ разделения 
 bool is_perfective_participle(string str, string& end_of_word);  // Проверка, что слово является совершенным деепричастием
+bool is_imperfective_participle(string str, string& end_of_word);   // Проверка, что слово является несовершенным деепричастием
+bool is_adjective(string str);                       // Проверка, что слово на "ая"/"яя" является прилагательным
 bool ru_consonants(char symb);                                   // Проверка, что символ является согласной буквой
 bool check_exceptions(int variant, string str);                    // Проверка строки на исключения
 bool check_dictionary(const int SIZE, string* array, string str);                   // Проверка на слова исключения 
@@ -42,4 +44,5 @@ string to_lower(string str);                                     // Приведение с
 string phonetic_algorithm(participle elem, int end_length);      // Фонетический алгоритм
 void rhymes_output(vector<participle>* v);                      // Вывод всех найденных рифм
 bool search_rhyms(participle elem_1, participle elem_2);                     // Поиск рифмы между парой слов
-bool rhyme_with_ends_1(participle elem_1, participle elem_2, int indent);         // Сравнение слов на рифму по окончанию "вшись"
+bool rhyme_with_ends_1(participle elem_1, participle elem_2, int indent, int end_variant=1);         // Сравнение слов на рифму по окончанию "вшись"
+bool replacement_algorithm(string end_1, string end_2, int reverse_position);                    // Алгоритм замены буквы для проверки равенства окончаний

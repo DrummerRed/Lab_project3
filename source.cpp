@@ -33,7 +33,8 @@ int read_file(string file_name, vector<participle>* v)        // Чтение файла
             else if (check_symbol(symb) == 1)
             {
                 str = to_lower(str);
-                if (is_perfective_participle(str, end_of_word))
+                if (is_perfective_participle(str, end_of_word) ||        // совершенный вид
+                    is_imperfective_participle(str, end_of_word))        // несовершенный вид
                 {
                     printf("%s\t- %s\n", str.c_str(), end_of_word.c_str());
                     if (unique_elem(str, v))
@@ -84,9 +85,6 @@ int check_symbol(char ch)                           // Проверка на символ раздел
     return split_str;
 }
 
-
-////////////////////////////////////////////////////////////      Нужно сделать аналог для несовершенного вида
-///////////////////////////////////////////////////////////
 bool is_perfective_participle(string str, string& end_of_word)  // Проверка, что слово является совершенным деепричастием
 {                                                               // возвращает true, если слово совершенное дееприч. 
     bool checker = false;                                       // иначе возвращает false
@@ -123,6 +121,15 @@ bool is_perfective_participle(string str, string& end_of_word)  // Проверка, что
                 checker = true;
                 end_of_word = "ши";
             }
+            /////////
+            else if (((str.rfind("ав") == length - 2) || (str.rfind("яв") == length - 2) ||    // "ав", "яв", "ив", "ев"    
+                (str.rfind("ив") == length - 2) || (str.rfind("ев") == length - 2)) &&
+                ru_consonants(str[length - 3]) && (str.find('-') == -1) &&                // перед гласной - согласная
+                check_exceptions(6, str))                                                  // (чтобы не брать "героев"),
+            {                                                                                   // без дефиса ("на-а-против")
+                checker = true;
+                end_of_word = str.substr(length - 2);
+            }
         }
         
         if (length >= 4)
@@ -144,8 +151,97 @@ bool is_perfective_participle(string str, string& end_of_word)  // Проверка, что
 
     return checker;
 }
-///////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////
+
+// деепричастия несовершенного вида
+bool is_imperfective_participle(string str, string& end_of_word)   // Проверка, что слово является несовершенным деепричастием
+{                                                                   // возвращает true, если слово несоверш. дееприч.
+    bool checker = false;                                           // иначе возвращает false
+    int length = str.length();
+    string hissing = "жшчщ";                    // шипящие
+    string before_ivaya = "кгхжшчщ";            // буквы, после которых пишется "-ивая"
+
+    if (length >= 5)
+    {
+        if (str.rfind("ясь") == length - 3)                                     // "ясь": купаясь, смеясь
+        {
+            checker = true;
+            end_of_word = "ясь";
+        }
+        else if ((str.rfind("ась") == length - 3) && (hissing.find(str[length - 4]) != -1))    // "ась": кружась, держась
+        {
+            checker = true;
+            end_of_word = "ась";
+        }
+        else if (str.rfind("уя") == length - 2)                                 // "уя": рисуя, танцуя
+        {
+            checker = true;
+            end_of_word = "уя";
+        }
+        else if (str.rfind("юя") == length - 2)                                 // "юя": воюя, горюя
+        {
+            checker = true;
+            end_of_word = "юя";
+        }
+        else if (str.rfind("ывая") == length - 4)                               // "ывая": завывая
+        {
+            checker = true;
+            end_of_word = "ывая";
+        }
+        else if ((str.rfind("ивая") == length - 4) && (before_ivaya.find(str[length - 5]) != -1) &&
+            check_exceptions(4, str))                                           // "ивая": поглаживая
+        {
+            checker = true;
+            end_of_word = "ивая";
+        }
+        else if ((str.rfind("евая") == length - 4) && check_exceptions(4, str)) // "евая": распевая
+        {
+            checker = true;
+            end_of_word = "евая";
+        }
+        else if (((str.rfind("ая") == length - 2) || (str.rfind("яя") == length - 2)) &&
+            !is_adjective(str))                                                 // "ая", "яя": желая, гуляя
+        {
+            checker = true;
+            end_of_word = str.substr(length - 2);
+        }
+    }
+
+    return checker;
+}
+
+bool is_adjective(string str)                       // Проверка, что слово на "ая"/"яя" является прилагательным
+{                                                   // возвращает true, если прилагательное
+    bool result = false;                            // иначе возвращает false
+    int length = str.length();
+    char before = str[length - 4];                  // буква перед последней согласной: "кра[с]ная"
+
+    const int SIZE = 9;                             // деепричастия с двумя согласными перед "ая"
+    string verbs[SIZE] = { "сверкая", "играя", "мечтая", "листая", "исполняя",
+                           "объясняя", "выполняя", "наполняя", "заполняя" };
+
+    if (!check_dictionary(SIZE, verbs, str))        // слово есть в списке деепричастий
+        result = false;
+    else if ((str.rfind("вляя") == length - 4) || (str.rfind("бляя") == length - 4) ||
+        (str.rfind("пляя") == length - 4) || (str.rfind("мляя") == length - 4) ||
+        (str.rfind("лжая") == length - 4))             // объявляя, употребляя, укрепляя, утомляя, продолжая
+        result = false;
+    else if (ru_consonants(before) || before == 'ь')        // две согласные перед "ая": красная, тёплая, горькая
+        result = true;
+    else if (str.rfind("вая") == length - 3)                // новая, правая, живая (кроме "давая", "знавая", "ставая")
+        result = !((str.rfind("давая") == length - 5) ||
+            (length >= 6 && str.rfind("знавая") == length - 6) ||
+            (length >= 6 && str.rfind("ставая") == length - 6));
+    else if ((str.rfind("окая") == length - 4) || (str.rfind("ёкая") == length - 4) ||
+        (str.rfind("атая") == length - 4) || (str.rfind("ячая") == length - 4) ||
+        (str.rfind("щая") == length - 3))              // высокая, далёкая, богатая, горячая, летящая
+        result = true;
+    else if ((str.rfind("емая") == length - 4) || (str.rfind("омая") == length - 4))
+        result = true;                                      // нескрываемая, знакомая (причастия и прилагательные)
+    else if (!check_exceptions(5, str))                     // частые прилагательные: белая, старая, синяя
+        result = true;
+
+    return result;
+}
 
 bool ru_consonants(char symb)                       // Проверка, что символ является согласной буквой
 {                                                   // Возвращает true, если символ согласная буква
@@ -190,6 +286,45 @@ bool check_exceptions(int variant, string str)                    // Проверка ст
                             "наплыв", "заплыв", "смыв"};
         result = check_dictionary(SIZE, array, str);
     }
+    else if (variant == 4)                  // Исключения для "ивая", "евая"        /////
+    {
+        const int SIZE = 11;
+        string array[SIZE] = { "живая", "фальшивая", "плешивая", "паршивая", "вшивая", "боевая",
+                               "полевая", "ключевая", "дождевая", "грушевая", "межевая" };
+        result = check_dictionary(SIZE, array, str);
+
+        if ((length >= 6) && (str.rfind("чивая") == length - 5) && (str.rfind("ачивая") != length - 6))
+            result = false;                 // навязчивая, задумчивая (но не оборачивая, поворачивая)
+    }
+    else if (variant == 5)                  // Исключения для "ая", "яя": прилагательные, местоимения, существительные
+    {
+        const int SIZE = 69;
+        string array[SIZE] = { "белая", "смелая", "целая", "спелая", "зрелая", "умелая", "милая", "гнилая",
+                               "малая", "вялая", "усталая", "старая", "серая", "скорая", "бурая", "хмурая",
+                               "сырая", "золотая", "крутая", "святая", "молодая", "седая", "худая", "тупая",
+                               "слепая", "скупая", "прямая", "немая", "хромая", "любимая", "тихая", "сухая",
+                               "глухая", "плохая", "строгая", "дорогая", "другая", "большая", "хорошая", "синяя",
+                               "голая", "весёлая", "удалая", "сарая", "урожая", "попугая", "негодяя", "лентяя",
+                               "китая", "николая", "трамвая",
+                               "случая", "которая", "некоторая", "какая", "такая", "всякая", "никакая", "самая",
+                               "любая", "пролитая", "убитая", "забытая", "разбитая", "открытая", "закрытая",
+                               "скрытая", "умытая", "надутая" };
+        result = check_dictionary(SIZE, array, str);
+    }
+    else if (variant == 6)                  // Исключения для "ав", "яв", "ив", "ев"
+    {
+        const int SIZE = 62;
+        string array[SIZE] = { "рукав", "состав", "устав", "сплав", "застав", "канав", "забав", "расправ",
+                               "облав", "держав", "приправ", "переправ", "лукав", "кровав", "величав",
+                               "ярослав", "вячеслав", "святослав", "владислав", "станислав", "мстислав",
+                               "ростислав", "мотив", "архив", "актив", "залив", "прилив", "отлив", "разлив",
+                               "пролив", "курсив", "массив", "коллектив", "объектив", "детектив", "красив",
+                               "ленив", "счастлив", "правдив", "учтив", "игрив", "болтлив", "терпелив",
+                               "справедлив", "ревнив", "молчалив", "фальшив", "против", "напротив",
+                               "супротив", "позитив", "негатив", "перспектив", "локомотив", "дефектив",
+                               "напев", "припев", "запев", "посев", "королев", "нагрев", "перегрев" };
+        result = check_dictionary(SIZE, array, str);
+    }                                                                                               ////
     return result;              // уменьшить функцию или разделить на несколько
 }
 
