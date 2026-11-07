@@ -50,7 +50,7 @@ bool search_rhyms(participle elem_1, participle elem_2)                     // ѕ
         string end = elem_1.end_of_word;
 
         if (end == "вшись" || end == "вши")
-            // result = rhyme_with_ends_1(elem_1, elem_2, 1);                  // более м€гкий поиск
+            // result = rhyme_with_ends_1(elem_1, elem_2, 1);            // м€гкий поиск
             result = rhyme_with_ends_1(elem_1, elem_2, 2);               // жесткий поиский
         else if (end == "шись")
             result = rhyme_with_ends_1(elem_1, elem_2, 2);
@@ -58,14 +58,19 @@ bool search_rhyms(participle elem_1, participle elem_2)                     // ѕ
             result = rhyme_with_ends_1(elem_1, elem_2, 2, 2);                   /// отступ может быть больше (3)
 
         else if (end == "ув" || end == "ыв" || end == "ав" || end == "€в" ||
-            end == "ив" || end == "ев")                                            // совершенный вид на "в"
+            end == "ив" || end == "ев")                                            
             result = rhyme_with_ends_1(elem_1, elem_2, 1);
-        else if (end == "а€" || end == "€€" || end == "у€" || end == "ю€")             // несовершенный вид на "€"
+        else if (end == "а€" || end == "€€" || end == "у€" || end == "ю€")             
             result = rhyme_with_ends_1(elem_1, elem_2, 1);
-        else if (end == "€сь" || end == "ась")                                          // несовершенный вид на "сь"
-            result = rhyme_with_ends_1(elem_1, elem_2, 2);
-        else if (end == "ыва€" || end == "ива€" || end == "ева€")                       // несовершенный вид на "ва€"
-            result = rhyme_with_ends_1(elem_1, elem_2, 1);
+
+        else if (end == "€сь" || end == "ась")                                          
+            // result = rhyme_with_ends_1(elem_1, elem_2, 2);           // м€гкий поиск
+            // // result = rhyme_with_ends_1(elem_1, elem_2, 3);              // жесткий поиск
+            result = rhyme_with_ends_2(elem_1, elem_2);                 // жесткий поиск
+
+        else if (end == "ыва€" || end == "ива€" || end == "ева€")                       
+            // result = rhyme_with_ends_1(elem_1, elem_2, 1);           // ћ€гкий поиск
+            result = rhyme_with_ends_1(elem_1, elem_2, 2);              // жесткий поиск
     }
     return result;
 }
@@ -78,7 +83,7 @@ bool rhyme_with_ends_1(participle elem_1, participle elem_2, int indent, int end
     bool result = false;                                            // ≈сли не найдена, возвращает false
     string end = elem_1.end_of_word;
     int end_length = end.length() + indent;
-    if (indent > 0)
+    if (indent > 0)                                                 // ¬ыпон€ем фонетический алгоритм в месте отступа
     {
         elem_1.word = phonetic_algorithm(elem_1, end_length);       
         elem_2.word = phonetic_algorithm(elem_2, end_length);
@@ -102,11 +107,24 @@ bool rhyme_with_ends_1(participle elem_1, participle elem_2, int indent, int end
     return result;
 }
 
-bool rhyme_with_ends_2(participle elem_1, participle elem_2, int indent)
+
+// ќкончани€ €сь/ась
+bool rhyme_with_ends_2(participle elem_1, participle elem_2)
 {
     bool result = false;                                            // ≈сли не найдена, возвращает false
-    string end = elem_1.end_of_word;
+    string word_1 = elem_1.word;
+    string word_2 = elem_2.word;
 
+    // if ((word_1.length() > 5) && (word_2.length() > 5))
+    //     result = rhyme_with_ends_1(elem_1, elem_2, 3);              // жесткий поиск
+
+    if ((word_1.length() > 7) && (word_2.length() > 7))
+        result = rhyme_with_ends_1(elem_1, elem_2, 4);              // жесткий поиск
+
+    else
+        result = rhyme_with_ends_1(elem_1, elem_2, 2);           // м€гкий поиск
+
+    return result;
 }
 
 bool replacement_algorithm(string end_1, string end_2, int reverse_position)                    // јлгоритм замены буквы дл€ проверки равенства окончаний 

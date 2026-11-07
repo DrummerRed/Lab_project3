@@ -45,4 +45,5 @@ string phonetic_algorithm(participle elem, int end_length);      // Фонетический
 void rhymes_output(vector<participle>* v);                      // Вывод всех найденных рифм
 bool search_rhyms(participle elem_1, participle elem_2);                     // Поиск рифмы между парой слов
 bool rhyme_with_ends_1(participle elem_1, participle elem_2, int indent, int end_variant=1);         // Сравнение слов на рифму по окончанию "вшись"
+bool rhyme_with_ends_2(participle elem_1, participle elem_2);
 bool replacement_algorithm(string end_1, string end_2, int reverse_position);                    // Алгоритм замены буквы для проверки равенства окончаний
