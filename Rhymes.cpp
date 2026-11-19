@@ -13,12 +13,9 @@ string phonetic_algorithm(participle elem, int end_length) // Фонетический алгор
         else if (str[i] == 'я')
             str[i] = 'а';
         else if (str[i] == 'ы')
-            str[i] = 'ы';
+            str[i] = 'и';
         else if (str[i] == 'к')
             str[i] == 'г';
-
-        // д-т?
-        // г-к-х?
     }
     return str;
 }
@@ -34,13 +31,13 @@ int count_rhymes(vector<participle>* v) // Подсчет рифмующихся пар
     return count;
 }
 
-bool save_report(string report_file, vector<participle>* v, vector<string>* s) // Запись отчета в текстовый файл
-{                           
-    ofstream f(report_file);
+bool save_report(string report_file, vector<participle>* v, vector<string>* s)  // Запись отчета в текстовый файл
+{                                                                               // Возвращает true при успешной записи отчета
+    ofstream f(report_file);                                                    // при ошибке возвращает false
     if (!f.is_open())
         return false;
 
-    const int WIDTH = 72;// ширина отчета в символах
+    const int WIDTH = 72;               // ширина отчета в символах
     int length = (*v).size();
     int pairs = count_rhymes(v);
     f << left;
@@ -176,9 +173,9 @@ void write_wrapped(ofstream& f, string text, int indent) // Запись текста с пере
         f << string(indent, ' ') << line << "\n";
 }
 
-bool search_rhyms(participle elem_1, participle elem_2)// Поиск рифмы между парой слов
-{
-    bool result = false;
+bool search_rhyms(participle elem_1, participle elem_2)     // Поиск рифмы между парой слов
+{                                                           // Возвращает true, если рифма обнаружена
+    bool result = false;                                    // если рифма не найдена возвращает false
     if (elem_1.end_of_word == elem_2.end_of_word)
     {
         string end = elem_1.end_of_word;
@@ -197,8 +194,7 @@ bool search_rhyms(participle elem_1, participle elem_2)// Поиск рифмы между паро
             return stress_rhyme(elem_1, elem_2);
         }
 
-        if (end == "вшись" || end == "вши")
-            // result = rhyme_with_ends_1(elem_1, elem_2, 1);            
+        if (end == "вшись" || end == "вши")            
             result = rhyme_with_ends_1(elem_1, elem_2, 2); 
         else if (end == "шись")
             result = rhyme_with_ends_1(elem_1, elem_2, 2);
@@ -211,13 +207,10 @@ bool search_rhyms(participle elem_1, participle elem_2)// Поиск рифмы между паро
         else if (end == "ая" || end == "яя" || end == "уя" || end == "юя")
             result = rhyme_with_ends_1(elem_1, elem_2, 1);
 
-        else if (end == "ясь" || end == "ась")
-            // result = rhyme_with_ends_1(elem_1, elem_2, 2);           
-            // // result = rhyme_with_ends_1(elem_1, elem_2, 3);              
+        else if (end == "ясь" || end == "ась")              
             result = rhyme_with_ends_2(elem_1, elem_2);                 
 
-        else if (end == "ывая" || end == "ивая" || end == "евая")
-            // result = rhyme_with_ends_1(elem_1, elem_2, 1);          
+        else if (end == "ывая" || end == "ивая" || end == "евая")          
             result = rhyme_with_ends_1(elem_1, elem_2, 2);              
         else if (end.length() == 2)  // слова из словаря
             result = rhyme_with_ends_1(elem_1, elem_2, 0);
@@ -228,20 +221,20 @@ bool search_rhyms(participle elem_1, participle elem_2)// Поиск рифмы между паро
 // Разделим функции поиска рифм под каждое из окончаний деепричастий
 // Окончание 1 - "вшись", "шись", "вши"
 bool rhyme_with_ends_1(participle elem_1, participle elem_2, int indent, int end_variant)// Сравнение слов на рифму по окончаниям
-{                                                                  
-    bool result = false; 
+{                                                                                       // Возвращает true, если окончания дают потенциальную рифму                                 
+    bool result = false;                                                                // иначе возвращает false
     string end = elem_1.end_of_word;
     int end_length = end.length() + indent;
 
-    if (indent > 0)// Выпоняем фонетический алгоритм в месте отступа
+    if (indent > 0)     // Выпоняем фонетический алгоритм в месте отступа
     {
         elem_1.word = phonetic_algorithm(elem_1, end_length);
         elem_2.word = phonetic_algorithm(elem_2, end_length);
     }
     int idx_1 = elem_1.word.find(end) - indent;
     int idx_2 = elem_2.word.find(end) - indent;
-    if ((idx_1 < 0) || (idx_2 < 0))// в слове не хватает букв перед окончанием
-        return false;// ("кивая": перед "ивая" только одна буква)
+    if ((idx_1 < 0) || (idx_2 < 0))     // в слове не хватает букв перед окончанием
+        return false;       // ("кивая": перед "ивая" только одна буква)
 
     string sub_string_1 = elem_1.word.substr(idx_1, end_length);
     string sub_string_2 = elem_2.word.substr(idx_2, end_length);
@@ -277,9 +270,9 @@ int sya_indent(string word, string end)
     return indent;
 }
 
-bool rhyme_with_ends_2(participle elem_1, participle elem_2)
-{
-    bool result = false;                                     
+bool rhyme_with_ends_2(participle elem_1, participle elem_2)      // Сравнение слов на рифму по окончаниям на ась/ясь
+{                                                                 // Возвращает true, если окончания дают потенциальную рифму
+    bool result = false;                                          // иначе возвращает false
     int indent_1 = sya_indent(elem_1.word, elem_1.end_of_word);
     int indent_2 = sya_indent(elem_2.word, elem_2.end_of_word);
 
@@ -290,8 +283,8 @@ bool rhyme_with_ends_2(participle elem_1, participle elem_2)
 }
 
 bool replacement_algorithm(string end_1, string end_2, int reverse_position) // Алгоритм замены буквы для проверки равенства окончаний 
-{                                                                                               
-    bool result = true;                                                                        
+{                                         // Возвращает true, если из 1-го окончания можно получить 2-е заменив 1 букву (на позиции reverse_position)                               
+    bool result = true;                   // иначе false                                                
     if (end_1.length() == end_2.length())
     {
         int true_pos = end_1.length() - reverse_position;
@@ -310,7 +303,7 @@ bool replacement_algorithm(string end_1, string end_2, int reverse_position) // 
     return result;
 }
 
-int default_stress(string str) // Ударение "по умолчанию" для деепричастий
+int default_stress(string str)      // Ударение "по умолчанию" для деепричастий
 {                                                               
     if (ends_with(str, "сь"))                                   
         str.erase(str.length() - 2);
@@ -335,7 +328,7 @@ int default_stress(string str) // Ударение "по умолчанию" для деепричастий
     return result;
 }
 
-bool stress_rhyme(participle elem_1, participle elem_2) // Рифма по ударению. Сравниваем куски от ударной гласной до конца
+bool stress_rhyme(participle elem_1, participle elem_2)         // Рифма по ударению. Сравниваем куски от ударной гласной до конца
 {                                                               
     string part_1 = normalize_vowels(elem_1.word.substr(elem_1.stress));   
     string part_2 = normalize_vowels(elem_2.word.substr(elem_2.stress));   
