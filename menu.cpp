@@ -4,8 +4,8 @@ void menu()                             // Главное меню программы
 {
     string input_file = "";
     bool flag_esc = false;
-    vector<stress_word> dictionary;                         // словарь ударений
-    int dict_size = load_dictionary(DICT_FILE, &dictionary);  // -1, если файл словаря не найден
+    vector<stress_word> dictionary;                             // словарь ударений
+    int dict_size = load_dictionary(DICT_FILE, &dictionary);    // Возвращает размер словаря или -1, если файл словаря не найден
 
     while (!flag_esc)
     {
@@ -17,12 +17,7 @@ void menu()                             // Главное меню программы
         else if (key == '1')
             choose_input_file(input_file);
         else if (key == '2')
-        {
             search_rhymes_menu(input_file, &dictionary);
-            // read_file(input_file);                      // добавить проверки на отсутствие введенного файла
-            // run_search(input_file);
-            // _getch();
-        }
     }
     system("cls");
 }
@@ -47,8 +42,8 @@ void print_menu(string input_file, int dict_size)              // Вывод главного
     cout << "Esc - Выход\n";
 }
 
-int get_menu_key()                              // Ждём, пока нажмут 1, 2 или Esc,
-{                                               // Возвращает 0 в случае ошибки
+int get_menu_key()                              // Ожидание нажатия 1, 2 или Esc,
+{                                               // Возвращает код введенного символа
     bool is_pressed = false;
     int key = 0;
     while (!is_pressed)
@@ -142,8 +137,10 @@ bool input_file_name(string& name)              // Посимвольный ввод имени файла
         }
     }
     cout << "\n";
+
     if (result)
-        add_txt(name);                          
+        add_txt(name);   
+
     return result;
 }
 
@@ -154,10 +151,18 @@ void add_txt(string& name)                      // Если пользователь не ввел ".t
 }
 
 bool ends_with(string str, string ending)       // Проверка, что строка оканчивается на ending
-{
+{                                               // Возвращает true, если строка оканчивается на ending
+    bool result;                                // иначе возвращает false
+
     if (str.length() < ending.length())
-        return false;
-    return str.substr(str.length() - ending.length()) == ending;
+        result = false;
+
+    else
+    {
+        result = (str.substr(str.length() - ending.length()) == ending);
+    }
+
+    return result;
 }
 
 void search_rhymes_menu(string input_file, vector<stress_word>* d)                           // Раздел меню "Поиск рифм"
@@ -193,12 +198,12 @@ void search_rhymes_menu(string input_file, vector<stress_word>* d)              
         }
     }
     cout << "\nДля возвращения в меню нажмите Esc";
-    while (_getch() != KEY_ESC);                                     // ждем именно Esc
+    while (_getch() != KEY_ESC);                                     // ждем Esc
 }
 
 bool input_report_name(string input_file, string& report_file)      // Ввод имени файла для отчета
-{                                                                    // Возвращает false, если нажат Esc
-    bool result = false;
+{                                                                   // Возвращает false, если нажат Esc
+    bool result = false;                                            // Возвращает true, если введено корректное имя файла
     bool flag_exit = false;
     while (!flag_exit)
     {

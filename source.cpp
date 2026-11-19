@@ -1,10 +1,9 @@
 #include "header.h"
 
-int read_file(string file_name, vector<participle>* v, vector<string>* s, vector<stress_word>* d)   // Чтение файла, v - деепричастия, s - предложения, d - словарь ударений
-{
-    int code = 0;                                           
-    // Возвращает 1 при ошибке чтения файла
-    ifstream file;
+int read_file(string file_name, vector<participle>* v, vector<string>* s, vector<stress_word>* d)  
+{                                        // Чтение файла, v - деепричастия, s - предложения, d - словарь ударений
+    int code = 0;                        // Возвращает 0 при успешном чтении файла
+    ifstream file;                       // При ошибке чтения возвращает 1
     file.open(file_name);
 
     if (!file.is_open())
@@ -14,13 +13,19 @@ int read_file(string file_name, vector<participle>* v, vector<string>* s, vector
         int ch;
         string str;                                           // текущее слово
         string sentence;                                      // текущее предложение
-        string end_symbols = ".!?…";                           // символы конца предложения
+        string end_symbols = ".!?…";                          // символы конца предложения
         char prev = 0;                                        // предыдущий символ 
 
         while ((ch = file.get()) != EOF)
         {
             char symb = char(ch);
-            bool empty_line = (symb == '\n' && prev == '\n');  // пустая строка: конец абзаца или заголовок
+            bool empty_line;
+
+            if ((symb == '\n') && (prev == '\n'))
+                empty_line = true;
+            else
+                empty_line = false;
+
             if (symb != '\r')
                 prev = symb;
             if (check_symbol(symb) == 0)
@@ -83,7 +88,7 @@ void process_word(string str, vector<participle>* v, int sentence_numb, vector<s
         else                                                  // слово уже было
         {
             (*v)[idx].count++;
-            vector<int>& sent = (*v)[idx].sentences;
+            vector<int>& sent = (*v)[idx].sentences;          // ссылка на вектор (номера предложений, где встречается слово)
             if (sent[sent.size() - 1] != sentence_numb)       // одно предложение записываем один раз
                 sent.push_back(sentence_numb);
         }
@@ -91,7 +96,7 @@ void process_word(string str, vector<participle>* v, int sentence_numb, vector<s
 }
 
 string trim(string str)                                       // Удаление пробелов по краям строки
-{
+{                                                             // Возвращает строку без лишних пробелов слева/справа
     int begin = 0;
     int end = str.length() - 1;
     while (begin <= end && str[begin] == ' ')
@@ -119,7 +124,7 @@ int find_elem(string str, vector<participle>* v)              // Поиск слова в в
 int check_symbol(char ch)                           // Проверка на символ разделения 
 {                                                   // Возвращает 0, если символ не разделительный
     int split_str = 0;                              // Возвращает 1, если символ - разделитель
-    string split_symbols = " .,!?:;\n\t—–…";           // Возвращает 2, если символ не разделительный, но не требуется для записи 
+    string split_symbols = " .,!?:;\n\t—–…";        // Возвращает 2, если символ не разделительный, но не требуется для записи 
     string other_symbols = "\"\'()«»";
 
     if (split_symbols.find(ch) != -1)
@@ -205,7 +210,6 @@ bool is_perfective_participle(string str, string& end_of_word)  // Проверка, что
     return checker;
 }
 
-// деепричастия несовершенного вида
 bool is_imperfective_participle(string str, string& end_of_word)   // Проверка, что слово является несовершенным деепричастием
 {                                                                   // возвращает true, если слово несоверш. дееприч.
     bool checker = false;                                           // иначе возвращает false
@@ -363,7 +367,7 @@ bool check_exceptions(int variant, string str)                    // Проверка ст
 
         if ((length >= 6) && (str.rfind("чивая") == length - 5) && ru_consonants(str[length - 6]))
             result = false;                 // навязчивая, задумчивая (согласная перед "чивая"),
-        // но не оборачивая, покручивая (гласная перед "чивая")
+                                            // но не оборачивая, покручивая (гласная перед "чивая")
     }
     else if (variant == 5)                  // Исключения для "ая", "яя": прилагательные, местоимения, существительные
     {
@@ -397,7 +401,7 @@ bool check_exceptions(int variant, string str)                    // Проверка ст
     return result;              // уменьшить функцию или разделить на несколько
 }
 
-bool check_dictionary(const int SIZE, string* array, string str)                   // Проверка на слова исключения     
+bool check_dictionary(const int SIZE, string* array, string str)                 // Проверка на слова исключения     
 {                                                                                // Возвращает true, если исключение найдено
     bool result = true;                                                          // иначе возвращает false
 
@@ -412,7 +416,7 @@ bool check_dictionary(const int SIZE, string* array, string str)                
     return result;
 }
 
-string to_lower(string str)
+string to_lower(string str)                             // Переведение строки к нижнему регистру
 {
     for (int i = 0; i < str.length(); i++)
     {
@@ -489,7 +493,7 @@ int load_dictionary(string file_name, vector<stress_word>* d)   // Загрузка слов
     }
     file.close();
 
-    sort((*d).begin(), (*d).end(), compare_words);              // по алфавиту - для двоичного поиска
+    sort((*d).begin(), (*d).end(), compare_words);              // по алфавиту - для бинарного поиска
     return (*d).size();
 }
 
@@ -498,7 +502,7 @@ bool compare_words(stress_word a, stress_word b)                // Правило сорти
     return a.word < b.word;
 }
 
-int find_in_dictionary(string str, vector<stress_word>* d)      // Двоичный поиск слова в словаре
+int find_in_dictionary(string str, vector<stress_word>* d)      // Бинарный поиск слова в словаре
 {                                                               // Возвращает номер ударной буквы или -1
     int result = -1;
     int left = 0;

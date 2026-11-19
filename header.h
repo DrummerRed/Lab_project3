@@ -17,7 +17,7 @@ const int KEY_ENTER = 13;
 const int KEY_BACKSPACE = 8;
 const string DICT_FILE = "stress_dict.txt"; // словарь ударений 
 
-struct stress_word // слово из словаря ударений
+struct stress_word          // слово из словаря ударений
 {
     string word;                            
     int stress;                             
@@ -25,11 +25,11 @@ struct stress_word // слово из словаря ударений
 
 struct participle
 {
-    string word; // слово
-    string end_of_word; // окончание
-    int count; // сколько раз слово встретилось в тексте
-    vector<int> sentences; // номера предложений, где встречается слово (с 0)
-    int stress; // номер ударной буквы, -1 - ударение неизвестно
+    string word;                // слово
+    string end_of_word;         // окончание
+    int count;                  // сколько раз слово встретилось в тексте
+    vector<int> sentences;      // номера предложений, где встречается слово (с 0)
+    int stress;                 // номер ударной буквы, -1 - ударение неизвестно
 };
 
 void menu(); // Главное меню программы
@@ -55,11 +55,11 @@ bool input_file_name(string& name); // Посимвольный ввод имени файла
 void add_txt(string& name);  // Добавление ".txt", если пользователь его не ввел
 bool ends_with(string str, string ending); // Проверка, что строка оканчивается на ending
 bool input_report_name(string input_file, string& report_file); // Ввод имени файла для отчета
-string to_lower(string str); // Приведение строки к нижнему регистру
+string to_lower(string str);                        // Приведение строки к нижнему регистру
 
 int load_dictionary(string file_name, vector<stress_word>* d); // Загрузка словаря ударений (кол-во слов или -1)
 bool compare_words(stress_word a, stress_word b);  // Правило сортировки словаря (по алфавиту)
-int find_in_dictionary(string str, vector<stress_word>* d); // Двоичный поиск слова (ударная буква или -1)
+int find_in_dictionary(string str, vector<stress_word>* d); // Бинарный поиск слова (ударная буква или -1)
 int stress_by_rule(string str); // Ударение по правилам суффиксов (или -1)
 int get_stress(string str, vector<stress_word>* d); // Ударение: сначала словарь, потом правила
 int suffix_position(string str, string* array, int size); // Начало суффикса из списка (или -1)
