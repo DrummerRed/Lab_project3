@@ -4,10 +4,12 @@ void menu()                             // Главное меню программы
 {
     string input_file = "";
     bool flag_esc = false;
+    vector<stress_word> dictionary;                         // словарь ударений
+    int dict_size = load_dictionary(DICT_FILE, &dictionary);  // -1, если файл словаря не найден
 
     while (!flag_esc)
     {
-        print_menu(input_file);
+        print_menu(input_file, dict_size);
         int key = get_menu_key();
 
         if (key == KEY_ESC)
@@ -16,7 +18,7 @@ void menu()                             // Главное меню программы
             choose_input_file(input_file);
         else if (key == '2')
         {
-            search_rhymes_menu(input_file);
+            search_rhymes_menu(input_file, &dictionary);
             // read_file(input_file);                      // добавить проверки на отсутствие введенного файла
             // run_search(input_file);
             // _getch();
@@ -25,16 +27,21 @@ void menu()                             // Главное меню программы
     system("cls");
 }
 
-void print_menu(string input_file)              // Вывод главного меню
+void print_menu(string input_file, int dict_size)              // Вывод главного меню
 {
     system("cls");
     cout << "Поиск рифм\n";
     cout << "---------------------------\n";
     cout << "Файл для поиска: ";
     if (input_file == "")
-        cout << "не выбран\n\n";
+        cout << "не выбран\n";
     else
-        cout << input_file << "\n\n";
+        cout << input_file << "\n";
+    cout << "Словарь ударений: ";
+    if (dict_size == -1)
+        cout << "не найден (поиск только по окончаниям)\n\n";
+    else
+        cout << "загружен, слов: " << dict_size << "\n\n";
     cout << "1 - Выбрать файл для поиска\n";
     cout << "2 - Выполнить поиск рифм\n";
     cout << "Esc - Выход\n";
@@ -42,14 +49,14 @@ void print_menu(string input_file)              // Вывод главного меню
 
 int get_menu_key()                              // Ждём, пока нажмут 1, 2 или Esc,
 {                                               // Возвращает 0 в случае ошибки
-    bool is_pressed = false;                    
+    bool is_pressed = false;
     int key = 0;
     while (!is_pressed)
     {
         key = _getch();
         if (key == 0 || key == 224) // стрелки и F1-F12 приходят двумя кодами
         {
-            _getch();                       ///// ???
+            _getch();                       
             continue;
         }
         else if (key == '1' || key == '2' || key == KEY_ESC)
@@ -128,47 +135,83 @@ bool input_file_name(string& name)              // Посимвольный ввод имени файла
                 cout << "\b \b";                            // "Затираем" символ
             }
         }
-        else if ((eng_symb.find((char)key) != -1) || (ru_symb.find((char)key) != -1))           
+        else if ((eng_symb.find((char)key) != -1) || (ru_symb.find((char)key) != -1))
         {
             name += (char)key;
             cout << (char)key;
         }
     }
     cout << "\n";
-    // add_txt(name);
+    if (result)
+        add_txt(name);                          
     return result;
 }
 
-// void add_txt(string& name) // Если пользователь не ввёл ".txt", добавляем сами
-// {
-//     if (!ends_with(name, ".txt"))
-//         name += ".txt";
-// }
-
-// bool ends_with(string str, string ending)
-// {
-//     if (str.length() < ending.length())
-//         return false;
-//     return str.substr(str.length() - ending.length()) == ending;
-// }
-
-void search_rhymes_menu(string input_file)                           // Раздел меню "поиск рифм"
+void add_txt(string& name)                      // Если пользователь не ввел ".txt", добавляем его
 {
-    bool flag_esc = false;
+    if (!ends_with(to_lower(name), ".txt"))     // "Text.TXT" тоже считается введенным
+        name += ".txt";
+}
 
-    while (!flag_esc)
+bool ends_with(string str, string ending)       // Проверка, что строка оканчивается на ending
+{
+    if (str.length() < ending.length())
+        return false;
+    return str.substr(str.length() - ending.length()) == ending;
+}
+
+void search_rhymes_menu(string input_file, vector<stress_word>* d)                           // Раздел меню "Поиск рифм"
+{
+    system("cls");
+    if (input_file == "")
+        cout << "Поиск рифм невозможен, пока не выбран текстовый файл!\n";
+    else
     {
-        system("cls");
-        cout << "Для возвращения в меню нажмите Esc\n" << endl;
+        vector<participle> words;                                    // найденные деепричастия
+        vector<string> sentences;                                    // все предложения текста
 
-        if (input_file != "")
-            // read_file(input_file);
-            preparation_and_reading(input_file);
+        if (read_file(input_file, &words, &sentences, d) == 1)
+            cout << "Не удалось открыть файл \"" << input_file << "\".\n";
         else
-            cout << "Поиск рифм недоступен, пока не выбран текстовый файл!";
+        {
+            cout << "Анализ файла \"" << input_file << "\" завершен.\n";
+            cout << "---------------------------\n";
+            cout << "Предложений в тексте:      " << sentences.size() << "\n";
+            cout << "Найдено деепричастий:      " << words.size() << "\n";
+            cout << "Найдено рифмующихся пар:   " << count_rhymes(&words) << "\n\n";
 
-        int key = _getch();
-        if (key == KEY_ESC)
-            flag_esc = true;
+            string report_file;
+            if (input_report_name(input_file, report_file))          // Esc - отчет не сохраняем
+            {
+                if (save_report(report_file, &words, &sentences))
+                    cout << "\nОтчет сохранен в файл \"" << report_file << "\".\n";
+                else
+                    cout << "\nОшибка: не удалось создать файл \"" << report_file << "\".\n";
+            }
+            else
+                cout << "Отчет не сохранен.\n";
+        }
     }
+    cout << "\nДля возвращения в меню нажмите Esc";
+    while (_getch() != KEY_ESC);                                     // ждем именно Esc
+}
+
+bool input_report_name(string input_file, string& report_file)      // Ввод имени файла для отчета
+{                                                                    // Возвращает false, если нажат Esc
+    bool result = false;
+    bool flag_exit = false;
+    while (!flag_exit)
+    {
+        cout << "Введите имя файла для отчета (Enter - подтвердить, Esc - не сохранять):\n";
+        if (!input_file_name(report_file))
+            flag_exit = true;                                        // Esc
+        else if (to_lower(report_file) == to_lower(input_file))      // защита исходного текста
+            cout << "Нельзя сохранить отчет в исходный файл - он будет стерт. Введите другое имя.\n\n";
+        else
+        {
+            result = true;
+            flag_exit = true;
+        }
+    }
+    return result;
 }

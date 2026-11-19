@@ -3,8 +3,8 @@
 int main()
 {
     setlocale(LC_ALL, "Rus");
-    SetConsoleCP(1251);                 
-    SetConsoleOutputCP(1251);           
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
 
     // read_file("file_2.txt");
     menu();
