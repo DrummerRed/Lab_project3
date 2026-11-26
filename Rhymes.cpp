@@ -31,40 +31,144 @@ int count_rhymes(vector<participle>* v) // Подсчет рифмующихся пар
     return count;
 }
 
-bool save_report(string report_file, vector<participle>* v, vector<string>* s)  // Запись отчета в текстовый файл
+// bool save_report(string report_file, vector<participle>* v, vector<string>* s)  // Запись отчета в текстовые файлы
+// {           
+//     string rhymes_file = report_file + "_rhymes.txt";                           // Возвращает true при успешной записи отчета
+//     string sentences_file = report_file + "_sentences.txt";                     // при ошибке возвращает false
+    
+//     // ofstream f(report_file); 
+//     ofstream f_rhymes(rhymes_file);                                                    
+//     if (!f_rhymes.is_open())
+//         return false;
+
+//     const int WIDTH = 72;               // ширина отчета в символах
+//     int length = (*v).size();
+//     int pairs = count_rhymes(v);
+//     f_rhymes << left;
+
+//     // f << "Программа по поиску рифм в деепричастиях.\n";
+
+//     // Найденные деепричастия
+//     // f << "1. Найденные деепричастия\n";
+//     // if (length == 0)
+//     // {
+//     //     write_line(f, '-', WIDTH);
+//     //     f << "   Деепричастия в тексте не найдены.\n";
+//     // }
+//     // else
+//     // {
+//     //     f << "  " << setw(6) << "№" << setw(20) << "Деепричастие" << "Окончание\n";
+//     //     write_line(f, '-', WIDTH);
+//     //     for (int i = 0; i < length; i++)
+//     //         f << "  " << setw(6) << i + 1 << setw(20) << (*v)[i].word << (*v)[i].end_of_word << "\n";
+//     // }
+
+//     //Найденные пары рифм 
+//     vector<bool> in_pair(length, false); // входит ли слово хотя бы в одну пару
+//     f_rhymes << "1. Найденные пары рифм\n";
+//     write_line(f_rhymes, '-', WIDTH);
+//     if (pairs == 0)
+//         f_rhymes << "   Рифмующиеся пары не найдены.\n";
+//     else
+//     {
+//         int numb = 0;
+//         for (int i = 0; i < length - 1; i++)
+//             for (int j = i + 1; j < length; j++)
+//                 if (search_rhyms((*v)[i], (*v)[j]))
+//                 {
+//                     in_pair[i] = true;// отмечаем оба слова пары
+//                     in_pair[j] = true;
+//                     numb++;
+//                     f_rhymes << "  " << setw(7) << to_string(numb) + "." << setw(20) << (*v)[i].word << "-   " << (*v)[j].word << "\n";
+//                 }
+//     }
+
+//     //Количество появлений слов из пар 
+//     f_rhymes << "\n\n2. Количество появлений\n";
+//     write_line(f_rhymes, '-', WIDTH);
+//     if (pairs == 0)
+//         f_rhymes << "   Нет слов, образующих пары рифм.\n";
+//     else
+//     {
+//         for (int i = 0; i < length; i++)
+//         {
+//             if (in_pair[i]) // только слова из пункта 1
+//             {
+//                 participle& e = (*v)[i];
+//                 f_rhymes << e.word << ": количество появлений: " << e.count << ", номера предложений: ";
+//                 for (int k = 0; k < e.sentences.size(); k++)
+//                 {
+//                     if (k > 0)
+//                         f_rhymes << ", ";
+//                     f_rhymes << e.sentences[k] + 1; // нумерация предложений с 1
+//                 }
+//                 f_rhymes << "\n";
+//             }
+//         }
+//     }
+//     f_rhymes.close();
+
+//     // Предложения с данными словами
+//     ofstream f_sentences(sentences_file);                                                    
+//     if (!f_sentences.is_open())
+//         return false;
+ 
+//     f_sentences << "3. Предложения\n";
+//     write_line(f_sentences, '-', WIDTH);
+//     if (length == 0)
+//         f_sentences << "   Нет предложений с деепричастиями.\n";
+//     else
+//     {
+//         int count_s = (*s).size();
+//         vector<string> marks(count_s);// какие деепричастия есть в каждом предложении
+//         for (int i = 0; i < length; i++)
+//         {
+//             participle& e = (*v)[i];
+//             for (int k = 0; k < e.sentences.size(); k++)
+//             {
+//                 int numb = e.sentences[k];
+//                 if (numb < count_s)
+//                 {
+//                     if (marks[numb] != "")
+//                         marks[numb] += ", ";
+//                     marks[numb] += e.word;
+//                 }
+//             }
+//         }
+//         for (int k = 0; k < count_s; k++) // предложения по порядку, каждое один раз
+//         {
+//             if (marks[k] != "")
+//             {
+//                 f_sentences << "Предложение " << k + 1 << " (" << marks[k] << "):\n";
+//                 write_wrapped(f_sentences, (*s)[k], 6);
+//                 f_sentences << "\n";
+//             }
+//         }
+//     }
+//     f_sentences.close();
+
+//     return true;
+// }
+
+bool save_rhymes_report(string report_file, vector<participle>* v)              // Запись отчета о рифмах в текстовый файл
 {                                                                               // Возвращает true при успешной записи отчета
-    ofstream f(report_file);                                                    // при ошибке возвращает false
-    if (!f.is_open())
+    string rhymes_file = report_file + "_rhymes.txt";                           // при ошибке возвращает false                    
+     
+    ofstream f_rhymes(rhymes_file);                                                    
+    if (!f_rhymes.is_open())
         return false;
 
     const int WIDTH = 72;               // ширина отчета в символах
     int length = (*v).size();
     int pairs = count_rhymes(v);
-    f << left;
-
-    f << "Программа по поиску рифм в деепричастиях.\n";
-
-    // Найденные деепричастия
-    f << "1. Найденные деепричастия\n";
-    if (length == 0)
-    {
-        write_line(f, '-', WIDTH);
-        f << "   Деепричастия в тексте не найдены.\n";
-    }
-    else
-    {
-        f << "  " << setw(6) << "№" << setw(20) << "Деепричастие" << "Окончание\n";
-        write_line(f, '-', WIDTH);
-        for (int i = 0; i < length; i++)
-            f << "  " << setw(6) << i + 1 << setw(20) << (*v)[i].word << (*v)[i].end_of_word << "\n";
-    }
+    f_rhymes << left;
 
     //Найденные пары рифм 
     vector<bool> in_pair(length, false); // входит ли слово хотя бы в одну пару
-    f << "\n\n2. Найденные пары рифм\n";
-    write_line(f, '-', WIDTH);
+    f_rhymes << "1. Найденные пары рифм\n";
+    write_line(f_rhymes, '-', WIDTH);
     if (pairs == 0)
-        f << "   Рифмующиеся пары не найдены.\n";
+        f_rhymes << "   Рифмующиеся пары не найдены.\n";
     else
     {
         int numb = 0;
@@ -75,39 +179,60 @@ bool save_report(string report_file, vector<participle>* v, vector<string>* s)  
                     in_pair[i] = true;// отмечаем оба слова пары
                     in_pair[j] = true;
                     numb++;
-                    f << "  " << setw(7) << to_string(numb) + "." << setw(20) << (*v)[i].word << "-   " << (*v)[j].word << "\n";
+                    f_rhymes << "  " << setw(7) << to_string(numb) + "." << setw(20) << (*v)[i].word << "-   " << (*v)[j].word << "\n";
                 }
     }
 
     //Количество появлений слов из пар 
-    f << "\n\n3. Количество появлений\n";
-    write_line(f, '-', WIDTH);
+    f_rhymes << "\n\n2. Количество появлений\n";
+    write_line(f_rhymes, '-', WIDTH);
     if (pairs == 0)
-        f << "   Нет слов, образующих пары рифм.\n";
+        f_rhymes << "   Нет слов, образующих пары рифм.\n";
     else
     {
         for (int i = 0; i < length; i++)
         {
-            if (in_pair[i]) // только слова из пункта 2
+            if (in_pair[i]) // только слова из пункта 1
             {
                 participle& e = (*v)[i];
-                f << e.word << ": количество появлений: " << e.count << ", номера предложений: ";
+                f_rhymes << e.word << ": количество появлений: " << e.count << ", номера предложений: ";
                 for (int k = 0; k < e.sentences.size(); k++)
                 {
                     if (k > 0)
-                        f << ", ";
-                    f << e.sentences[k] + 1; // нумерация предложений с 1
+                        f_rhymes << ", ";
+                    f_rhymes << e.sentences[k] + 1; // нумерация предложений с 1
                 }
-                f << "\n";
+                f_rhymes << "\n";
             }
         }
     }
+    f_rhymes.close();
+    
+    return true;
+}
 
-    // Предложения с данными словами 
-    f << "\n\n4. Предложения\n";
-    write_line(f, '-', WIDTH);
+bool save_sentences_report(string report_file, vector<participle>* v, vector<string>* s)  // Запись отчета о предложениях в текстовый файл
+{                                                                               // Возвращает true при успешной записи отчета
+    string sentences_file = report_file + "_sentences.txt";                     // при ошибке возвращает false
+
+    const int WIDTH = 72;               // ширина отчета в символах
+    int length = (*v).size();
+    // int pairs = count_rhymes(v);
+
+    //Найденные пары рифм 
+    // vector<bool> in_pair(length, false); // входит ли слово хотя бы в одну пару
+
+    // Предложения с данными словами
+    ofstream f_sentences(sentences_file);                                                    
+    if (!f_sentences.is_open())
+        return false;
+
+    f_sentences << left;
+ 
+    f_sentences << "3. Предложения\n";
+    write_line(f_sentences, '-', WIDTH);
     if (length == 0)
-        f << "   Нет предложений с деепричастиями.\n";
+        f_sentences << "   Нет предложений с деепричастиями.\n";
     else
     {
         int count_s = (*s).size();
@@ -130,13 +255,14 @@ bool save_report(string report_file, vector<participle>* v, vector<string>* s)  
         {
             if (marks[k] != "")
             {
-                f << "Предложение " << k + 1 << " (" << marks[k] << "):\n";
-                write_wrapped(f, (*s)[k], 6);
-                f << "\n";
+                f_sentences << "Предложение " << k + 1 << " (" << marks[k] << "):\n";
+                write_wrapped(f_sentences, (*s)[k], 6);
+                f_sentences << "\n";
             }
         }
     }
-    f.close();
+    f_sentences.close();
+
     return true;
 }
 
