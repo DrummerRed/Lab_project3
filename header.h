@@ -37,6 +37,7 @@ void print_menu(string input_file, int dict_size); // Вывод главного меню
 int get_menu_key(); // Выбор пункта меню 
 void search_rhymes_menu(string input_file, vector<stress_word>* d); // Раздел меню "поиск рифм"
 
+
 int read_file(string file_name, vector<participle>* v, vector<string>* s, vector<stress_word>* d); // Чтение файла: деепричастия и предложения
 void process_word(string str, vector<participle>* v, int sentence_numb, vector<stress_word>* d); // Обработка одного слова текста
 string trim(string str); // Удаление пробелов по краям строки
@@ -51,10 +52,12 @@ bool check_exceptions(int variant, string str); // Проверка строки на исключения
 bool check_dictionary(const int SIZE, string* array, string str); // Проверка на слова исключения 
 void choose_input_file(string& input_file); // Считывание имени входного файла
 void wait_key(); // Ожидание нажатия клавиши
-bool input_file_name(string& name); // Посимвольный ввод имени файла
+bool input_file_name(string& name, bool output_name = false); // Посимвольный ввод имени файла
 void add_txt(string& name);  // Добавление ".txt", если пользователь его не ввел
 bool ends_with(string str, string ending); // Проверка, что строка оканчивается на ending
-bool input_report_name(string input_file, string& report_file); // Ввод имени файла для отчета
+bool input_report_name(string& report_file); // Ввод имени файла для отчета
+int check_file(string report_file);                                      // Проверка на существование выходного файла
+void file_is_exist(string report_file, int code);                        // Вывод сообщения о существовании файла
 string to_lower(string str);                        // Приведение строки к нижнему регистру
 
 int load_dictionary(string file_name, vector<stress_word>* d); // Загрузка словаря ударений (кол-во слов или -1)
@@ -70,9 +73,12 @@ int default_stress(string str); // Ударение "по умолчанию" (перед окончанием)
 bool stress_rhyme(participle elem_1, participle elem_2); // Рифма по ударению (от ударной гласной до конца)
 string normalize_vowels(string str); // Приведение созвучных гласных к одной
 
+// Rhymes.cpp
 string phonetic_algorithm(participle elem, int end_length); // Фонетический алгоритм
 int count_rhymes(vector<participle>* v); // Подсчет рифмующихся пар
-bool save_report(string report_file, vector<participle>* v, vector<string>* s); // Запись отчета в текстовый файл
+bool save_rhymes_report(string report_file, vector<participle>* v);              // Запись отчета о рифмах в текстовый файл
+bool save_sentences_report(string report_file, vector<participle>* v, vector<string>* s);  // Запись отчета о предложениях в текстовый файл
+// bool save_report(string report_file, vector<participle>* v, vector<string>* s); // Запись отчета в текстовый файл
 void write_line(ofstream& f, char symb, int length); // Разделительная линия в отчете
 void write_wrapped(ofstream& f, string text, int indent); // Запись текста с переносом строк
 bool search_rhyms(participle elem_1, participle elem_2); // Поиск рифмы между парой слов

@@ -96,8 +96,8 @@ void wait_key()                                                     // Ожидание 
     _getch();
 }
 
-bool input_file_name(string& name)              // Посимвольный ввод имени файла
-{                                               // Возвращает false при нажатии Esc, иначе возвращает true
+bool input_file_name(string& name, bool output_name)              // Посимвольный ввод имени файла
+{                                                                 // Возвращает false при нажатии Esc, иначе возвращает true
     bool result = true;
     bool exit_flag = false;
     string eng_symb = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.";
@@ -138,7 +138,7 @@ bool input_file_name(string& name)              // Посимвольный ввод имени файла
     }
     cout << "\n";
 
-    if (result)
+    if (result && !output_name)
         add_txt(name);   
 
     return result;
@@ -186,12 +186,28 @@ void search_rhymes_menu(string input_file, vector<stress_word>* d)              
             cout << "Найдено рифмующихся пар:   " << count_rhymes(&words) << "\n\n";
 
             string report_file;
-            if (input_report_name(input_file, report_file))          // Esc - отчет не сохраняем
+            if (input_report_name(report_file))          // Esc - отчет не сохраняем
             {
-                if (save_report(report_file, &words, &sentences))
-                    cout << "\nОтчет сохранен в файл \"" << report_file << "\".\n";
-                else
-                    cout << "\nОшибка: не удалось создать файл \"" << report_file << "\".\n";
+                string rhymes_file = report_file + "_rhymes.txt";                           
+                string sentences_file = report_file + "_sentences.txt";
+                bool rhymes_report = save_rhymes_report(report_file, &words);
+                bool sentences_report = save_sentences_report(report_file, &words, &sentences);
+
+                if (rhymes_report && sentences_report)
+                {
+                    string rhymes_file = report_file + "_rhymes.txt";                           
+                    string sentences_file = report_file + "_sentences.txt";
+                    cout << "\nФайлы \"" << rhymes_file << " и ";
+                    cout << "\"" << sentences_file << "\" ";
+                    cout << "успешно сохранены.\n";
+                }
+                else 
+                {
+                    if (!rhymes_report)
+                        cout << "\nОшибка: не удалось создать файл \"" << rhymes_file << "\".\n";  
+                    if (!save_sentences_report(report_file, &words, &sentences)) 
+                        cout << "\nОшибка: не удалось создать файл \"" << sentences_file << "\".\n";
+                }
             }
             else
                 cout << "Отчет не сохранен.\n";
@@ -201,22 +217,83 @@ void search_rhymes_menu(string input_file, vector<stress_word>* d)              
     while (_getch() != KEY_ESC);                                     // ждем Esc
 }
 
-bool input_report_name(string input_file, string& report_file)      // Ввод имени файла для отчета
+bool input_report_name(string& report_file)                         // Ввод имени файла для отчета
 {                                                                   // Возвращает false, если нажат Esc
     bool result = false;                                            // Возвращает true, если введено корректное имя файла
     bool flag_exit = false;
+    int i = 0;
     while (!flag_exit)
     {
-        cout << "Введите имя файла для отчета (Enter - подтвердить, Esc - не сохранять):\n";
-        if (!input_file_name(report_file))
+        if (i == 0)
+        {
+            cout << "Будут созданы два файла:\n";
+            cout << "  <имя>_rhymes.txt    - содержит найденные пары рифм\n";
+            cout << "  <имя>_sentences.txt - содержит предложения с найденными словами\n";
+            cout << "Введите общее имя файлов (Enter - подтвердить, Esc - не сохранять):\n";
+        }
+
+        if (!input_file_name(report_file, true))
             flag_exit = true;                                        // Esc
-        else if (to_lower(report_file) == to_lower(input_file))      // защита исходного текста
-            cout << "Нельзя сохранить отчет в исходный файл - он будет стерт. Введите другое имя.\n\n";
+        else if (check_file(report_file) != 0)
+        {
+            int code = check_file(report_file);
+            file_is_exist(report_file, code);
+        }
         else
         {
             result = true;
             flag_exit = true;
         }
+
+        i++;
     }
     return result;
+}
+
+int check_file(string report_file)                                  // Проверка на существование выходного файла
+{                                                                   // Возвращает 0, если файлов с таким названием не существует
+    int code = 0;                                                   // Возвращает 1, если такой файл рифм уже есть
+    string rhymes_file = report_file + "_rhymes.txt";               // Возвращает 2, если такой файл предложений уже есть
+    string sentences_file = report_file + "_sentences.txt";         // Возвращает 3, если оба файла уже существуют
+
+    ifstream rhymes(rhymes_file);
+    if (rhymes.is_open())
+    {
+        rhymes.close();
+        code = 1;
+    }
+
+    ifstream sentences(sentences_file);
+    if (sentences.is_open())
+    {
+        if (code == 0)
+            code = 2;
+        else 
+            code = 3;
+
+        sentences.close();
+    }
+
+    return code;
+}
+
+void file_is_exist(string report_file, int code)                        // Вывод сообщения о существовании файла
+{
+    string rhymes_file = report_file + "_rhymes.txt";                      
+    string sentences_file = report_file + "_sentences.txt";
+
+    if ((code == 1) || (code == 2))
+    {
+        if (code == 1)
+            printf("\nОшибка! Файл \"%s\" уже существует!\n", rhymes_file.c_str());
+        else if (code == 2)
+            printf("\nОшибка! Файл \"%s\" уже существует!\n", sentences_file.c_str());
+        
+        printf("Выберите другое имя или удалите данный файл!\n");
+    }
+    else if (code == 3)
+    {
+        printf("\nОшибка! Файлы \"%s\" и \"%s\" уже существуют!\n", rhymes_file.c_str(), sentences_file.c_str());
+        printf("Выберите другое имя или удалите данные файлы!\n");
+    }
 }
